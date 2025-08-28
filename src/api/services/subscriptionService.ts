@@ -29,9 +29,7 @@ export interface Subscription {
 
 const COLLECTION_NAME = 'subscriptions';
 
-/**
- * Add a new subscription plan
- */
+
 export const addSubscription = async (subscriptionData: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
     const docData = {
@@ -56,9 +54,7 @@ export const addSubscription = async (subscriptionData: Omit<Subscription, 'id' 
   }
 };
 
-/**
- * Get all subscriptions or filter by active status
- */
+
 export const getSubscriptions = async (activeOnly: boolean = false): Promise<Subscription[]> => {
   try {
     let q;
@@ -95,6 +91,7 @@ export const getSubscriptions = async (activeOnly: boolean = false): Promise<Sub
     throw new Error('Failed to fetch subscriptions');
   }
 };
+
 
 /**
  * Get a single subscription by ID
@@ -151,9 +148,7 @@ export const updateSubscription = async (
   }
 };
 
-/**
- * Delete a subscription
- */
+
 export const deleteSubscription = async (id: string) => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
@@ -172,9 +167,7 @@ export const deleteSubscription = async (id: string) => {
   }
 };
 
-/**
- * Toggle subscription active status
- */
+
 export const toggleSubscriptionStatus = async (id: string, isActive: boolean) => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
@@ -197,9 +190,7 @@ export const toggleSubscriptionStatus = async (id: string, isActive: boolean) =>
   }
 };
 
-/**
- * Get subscriptions by duration
- */
+
 export const getSubscriptionsByDuration = async (duration: 'monthly' | 'six-month' | 'yearly'): Promise<Subscription[]> => {
   try {
     const q = query(
@@ -229,9 +220,7 @@ export const getSubscriptionsByDuration = async (duration: 'monthly' | 'six-mont
   }
 };
 
-/**
- * Get most popular subscription
- */
+
 export const getMostPopularSubscription = async (): Promise<Subscription | null> => {
   try {
     const q = query(
@@ -259,3 +248,5 @@ export const getMostPopularSubscription = async (): Promise<Subscription | null>
     throw new Error('Failed to fetch most popular subscription');
   }
 };
+
+

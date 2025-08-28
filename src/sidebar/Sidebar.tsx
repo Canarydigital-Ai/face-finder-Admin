@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
     {
       name: 'Subscriptions',
       icon: <FaBook size={20} />,
-      route: '/admin/Subscriptions-list',
+      route: '/admin/subscriptions-list',
       color: '#10B981'
     },
     {

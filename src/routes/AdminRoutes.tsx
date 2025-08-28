@@ -9,6 +9,7 @@ const SidebarLayout = lazy(() => import("../layouts/SidebarLayout"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const SubscriptionsList = lazy(() => import("../pages/subscriptions/SubscriptionList"));
 const CreateSubscription = lazy(() => import("../pages/subscriptions/CreateSubscription"));
+const EditSubscription = lazy(() => import("../pages/subscriptions/EditSubscription"));
 
 
 
@@ -39,8 +40,11 @@ const AdminRoutes: React.FC = memo(() => {
               <Routes>
                 <Route element={<SidebarLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/Subscriptions-list" element={<SubscriptionsList />} />
+                  <Route path="/subscriptions-list" element={<SubscriptionsList />} />
                   <Route path="/create-subscription" element={<CreateSubscription />} />
+                  <Route path="/edit-subscription/:id" element={<EditSubscription />} />
+
+
                 </Route>
               </Routes>
             </AdminProtectedRoute>

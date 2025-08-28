@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Modal from "../../components/Modal"; 
-import { FaPlus, FaMinus, FaSave, FaTimes, FaInfo } from "react-icons/fa";
-import { addSubscription } from "../../api/services/subscriptionService";
+import Modal from "../../components/Modal";
+import { FaPlus, FaMinus, FaSave, FaTimes, FaInfo, FaSpinner } from "react-icons/fa";
+import { getSubscriptionById, updateSubscription } from "../../api/services/subscriptionService";
 
-const CreateSubscription: React.FC = () => {
+const EditSubscription: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
-    duration: "monthly",
+    duration: "monthly" as 'monthly' | 'six-month' | 'yearly',
     ideal: "",
     storage: "",
     features: [""],
@@ -19,6 +20,46 @@ const CreateSubscription: React.FC = () => {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      fetchSubscriptionData();
+    } else {
+      navigate("/admin/subscriptions-list");
+    }
+  }, [id, navigate]);
+
+  const fetchSubscriptionData = async () => {
+    setLoadingData(true);
+    try {
+      const subscription = await getSubscriptionById(id!);
+      
+      if (subscription) {
+        setFormData({
+          name: subscription.name,
+          price: subscription.price,
+          duration: subscription.duration,
+          ideal: subscription.ideal,
+          storage: subscription.storage || "",
+          features: subscription.features.length > 0 ? subscription.features : [""],
+          mostPopular: subscription.mostPopular || false,
+          isActive: subscription.isActive
+        });
+        console.log("Loaded subscription data:", subscription);
+      } else {
+        setNotFound(true);
+        toast.error("Subscription plan not found");
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      toast.error("Failed to load subscription plan");
+      setNotFound(true);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement> | 
@@ -67,77 +108,62 @@ const CreateSubscription: React.FC = () => {
     }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Basic validation
-  if (!formData.name.trim() || !formData.ideal.trim()) {
-    toast.error("Plan name and description are required");
-    return;
-  }
-
-  if (formData.features.some(feature => !feature.trim())) {
-    toast.error("All features must have content");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // Remove the mock delay - this is not needed
-    // await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const subscriptionData = {
-      name: formData.name.trim(),
-      price: formData.price,
-      duration: formData.duration as 'monthly' | 'six-month' | 'yearly',
-      ideal: formData.ideal.trim(),
-      storage: formData.storage.trim() || undefined,
-      features: formData.features.filter(f => f.trim()),
-      mostPopular: formData.mostPopular,
-      isActive: formData.isActive
-      // Remove id, createdAt, updatedAt - Firebase service handles these
-    };
-
-    console.log("Creating subscription with data:", subscriptionData);
-
-    const result = await addSubscription(subscriptionData);
-
-    // Handle the response properly
-    if (result.success) {
-      console.log("Subscription created successfully with ID:", result.id);
-      setIsModalOpen(true);
-      setFormData({
-        name: "",
-        price: 0,
-        duration: "monthly",
-        ideal: "",
-        storage: "",
-        features: [""],
-        mostPopular: false,
-        isActive: true
-      });
-      toast.success("Subscription plan created successfully!");
-      setTimeout(() => navigate("/admin/subscriptions-list"), 2000); // Fix navigation path
-    } else {
-      console.error("Failed to create subscription:", result.message);
-      toast.error(result.message || "Failed to create subscription plan");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.name.trim() || !formData.ideal.trim()) {
+      toast.error("Plan name and description are required");
+      return;
     }
-  } catch (error) {
-    console.error("Error in handleSubmit:", error);
-    toast.error("Failed to create subscription. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    if (formData.features.some(feature => !feature.trim())) {
+      toast.error("All features must have content");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const subscriptionData = {
+        name: formData.name.trim(),
+        price: formData.price,
+        duration: formData.duration,
+        ideal: formData.ideal.trim(),
+        storage: formData.storage.trim() || undefined,
+        features: formData.features.filter(f => f.trim()),
+        mostPopular: formData.mostPopular,
+        isActive: formData.isActive
+      };
+
+      console.log("Updating subscription with data:", subscriptionData);
+
+      const result = await updateSubscription(id!, subscriptionData);
+
+      if (result.success) {
+        console.log("Subscription updated successfully");
+        setIsModalOpen(true);
+        toast.success("Subscription plan updated successfully!");
+        setTimeout(() => navigate("/admin/subscriptions-list"), 2000);
+      } else {
+        console.error("Failed to update subscription:", result.message);
+        toast.error(result.message || "Failed to update subscription plan");
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      toast.error("Failed to update subscription. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    navigate("/admin/subjects-list");
+    navigate("/admin/subscriptions-list");
   };
 
   const handleCancel = () => {
-    navigate("/admin/subjects-list");
+    navigate("/admin/subscriptions-list");
   };
 
   const formatPrice = (price: number, duration: string) => {
@@ -148,13 +174,44 @@ const handleSubmit = async (e: React.FormEvent) => {
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
+  // Loading state
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-[#FFD426] mx-auto mb-4" />
+          <p className="text-gray-600">Loading subscription plan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found state
+  if (notFound) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="text-6xl text-gray-300 mb-4">404</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Subscription Plan Not Found</h2>
+          <p className="text-gray-600 mb-6">The subscription plan you're looking for doesn't exist.</p>
+          <button
+            onClick={() => navigate("/admin/subscriptions-list")}
+            className="px-6 py-3 bg-[#FFD426] text-black rounded-lg font-semibold hover:bg-[#e6b800] transition"
+          >
+            Back to Subscriptions List
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Create Subscription Plan</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Edit Subscription Plan</h2>
           <div className="text-sm text-gray-600">
-            Add a new pricing plan for your service
+            Update your existing pricing plan
           </div>
         </div>
 
@@ -372,7 +429,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               disabled={loading}
             >
               <FaSave />
-              {loading ? "Creating..." : "Create Plan"}
+              {loading ? "Updating..." : "Update Plan"}
             </button>
             <button
               type="button"
@@ -389,11 +446,11 @@ const handleSubmit = async (e: React.FormEvent) => {
           isOpen={isModalOpen}
           onClose={handleModalClose}
           title="Success"
-          message="Subscription plan created successfully!"
+          message="Subscription plan updated successfully!"
         />
       </div>
     </div>
   );
 };
 
-export default CreateSubscription;
+export default EditSubscription;

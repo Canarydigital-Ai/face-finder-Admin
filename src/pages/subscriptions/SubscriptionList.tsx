@@ -12,27 +12,18 @@ import type {
 import { DataTable } from "mantine-datatable";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit } from "react-icons/fi";
-import Dropdown from "../../layouts/Dropdown";  
+import Dropdown from "../../layouts/Dropdown"; 
 import "@mantine/core/styles.css";
 import "mantine-datatable/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosArrowDown } from "react-icons/io";
 import Swal from "sweetalert2";
 import { FaPlus, FaCrown, FaFire } from "react-icons/fa";
-
-interface Subscription {
-  id: string;
-  name: string;
-  price: number;
-  duration: 'monthly' | 'six-month' | 'yearly';
-  ideal: string;
-  storage?: string;
-  features: string[];
-  mostPopular?: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { 
+  getSubscriptions, 
+  deleteSubscription, 
+  type Subscription 
+} from "../../api/services/subscriptionService";
 
 const SubscriptionsList: React.FC = () => {
   const navigate = useNavigate();
@@ -53,105 +44,29 @@ const SubscriptionsList: React.FC = () => {
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
 
-  // Mock data based on your pricing plans
-  const mockSubscriptions: Subscription[] = [
-    {
-      id: "1",
-      name: "Free",
-      price: 0,
-      duration: "monthly",
-      ideal: "A simple way to try out Selfind with limited storage and one event, ideal for small personal use.",
-      storage: "100GB",
-      features: [
-        "Storage - 1250 Photos",
-        "Events - 1 Event",
-        "Hosting Duration - 7 Days",
-        "WhatsApp & Email - Email Only",
-        "Branding - Self Domain",
-        "Support - Standard"
-      ],
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: "2",
-      name: "Basic",
-      price: 999,
-      duration: "monthly",
-      ideal: "Great for regular users who need unlimited events, more storage and priority support at an affordable price.",
-      storage: "100GB",
-      features: [
-        "Storage - 100 GB",
-        "Events - Unlimited",
-        "Hosting Duration - 30 Days",
-        "WhatsApp & Email - Unlimited",
-        "Branding - Sub Domain Branding",
-        "Support - Priority"
-      ],
-      mostPopular: true,
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: "3",
-      name: "Pro",
-      price: 1999,
-      duration: "monthly",
-      ideal: "Perfect for professionals and businesses who need advanced branding, analytics and extended hosting.",
-      storage: "500GB",
-      features: [
-        "Storage - 500 GB",
-        "Events - Unlimited",
-        "Hosting Duration - 90 Days",
-        "WhatsApp & Email - Unlimited",
-        "Branding - Custom domain, Event QR, Analytics",
-        "Support - Premium"
-      ],
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: "4",
-      name: "Enterprise",
-      price: 3999,
-      duration: "monthly",
-      ideal: "Great for regular users who need unlimited events, more storage and priority support at an affordable price.",
-      storage: "1TB",
-      features: [
-        "Storage - 100 GB",
-        "Events - Unlimited",
-        "Hosting Duration - 30 Days",
-        "WhatsApp & Email - Unlimited",
-        "Branding - Sub Domain Branding",
-        "Support - Priority"
-      ],
-      isActive: false,
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-  ];
-
   useEffect(() => {
-    const fetchSubscriptions = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call with mock data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setSubscriptions(mockSubscriptions);
-        setRecords(mockSubscriptions);
-      } catch (error) {
-        console.error("Error fetching subscriptions:", error);
-        toast.error("Failed to fetch subscriptions");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSubscriptions();
   }, []);
+
+  const fetchSubscriptions = async () => {
+    setLoading(true);
+    try {
+      const subscriptionsData = await getSubscriptions(false); // Get all subscriptions from Firebase
+      setSubscriptions(subscriptionsData);
+      setRecords(subscriptionsData);
+      
+      if (subscriptionsData.length === 0) {
+        console.log("No subscriptions found in Firebase collection");
+      } else {
+        console.log(`Loaded ${subscriptionsData.length} subscriptions from Firebase:`, subscriptionsData);
+      }
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      toast.error("Failed to fetch subscriptions");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const filteredData = subscriptions.filter(({ name, ideal, duration, storage }) =>
@@ -192,11 +107,15 @@ const SubscriptionsList: React.FC = () => {
     if (!selectedSubscriptionId) return;
 
     try {
-      // Mock delete operation
-      setSubscriptions((prevSubscriptions) =>
-        prevSubscriptions.filter((subscription) => subscription.id !== selectedSubscriptionId)
-      );
-      toast.success("Subscription deleted successfully!");
+      const result = await deleteSubscription(selectedSubscriptionId);
+      if (result.success) {
+        setSubscriptions((prevSubscriptions) =>
+          prevSubscriptions.filter((subscription) => subscription.id !== selectedSubscriptionId)
+        );
+        toast.success("Subscription deleted successfully!");
+      } else {
+        toast.error(result.message || "Failed to delete subscription");
+      }
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Failed to delete subscription. Please try again.");
@@ -230,7 +149,7 @@ const SubscriptionsList: React.FC = () => {
       
       if (confirmation.isConfirmed) {
         setSubscriptions((prev) =>
-          prev.filter((subscription) => !selectedRecords.includes(subscription.id))
+          prev.filter((subscription) => !selectedRecords.includes(subscription.id as any))
         );
         toast.success("Records deleted successfully!");
         setSelectedRecords([]);
@@ -257,7 +176,7 @@ const SubscriptionsList: React.FC = () => {
     if (selectedRecords.length === records.length) {
       setSelectedRecords([]);
     } else {
-      setSelectedRecords(records.map((record) => record.id));
+      setSelectedRecords(records.map((record) => record.id ?? ''));
     }
   };
 
@@ -286,11 +205,11 @@ const SubscriptionsList: React.FC = () => {
           className="w-5 h-5"
         />
       ),
-      render: ({ id }) => (
+      render: ({ id } ) => (
         <input
           type="checkbox"
-          checked={selectedRecords.includes(id)}
-          onChange={() => handleSelectRecord(id)}
+          checked={selectedRecords.includes(id as any)}
+          onChange={() => handleSelectRecord(id as any)}
           className="w-5 h-5"
         />
       ),
@@ -301,7 +220,7 @@ const SubscriptionsList: React.FC = () => {
       render: ({ id }) => (
         <div className="flex items-center space-x-1">
           <ActionIcon
-            onClick={() => handleEdit(id)}
+            onClick={() => handleEdit(id as any)}
             title="Edit"
             className="text-blue-500"
             variant="transparent"
@@ -309,7 +228,7 @@ const SubscriptionsList: React.FC = () => {
             <FiEdit />
           </ActionIcon>
           <ActionIcon
-            onClick={() => openDialog(id)}
+            onClick={() => openDialog(id as any)}
             title="Delete"
             className="text-red-500"
             variant="transparent"
@@ -487,6 +406,8 @@ const SubscriptionsList: React.FC = () => {
             <option value="">Action Dropdown</option>
             <option value="edit">Edit</option>
             <option value="delete">Delete</option>
+            <option value="activate">Activate</option>
+            <option value="deactivate">Deactivate</option>
           </select>
         </div>
       </div>
