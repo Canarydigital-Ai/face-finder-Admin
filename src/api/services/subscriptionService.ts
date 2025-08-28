@@ -17,7 +17,7 @@ export interface Subscription {
   id?: string;
   name: string;
   price: number;
-  duration: 'monthly' | 'six-month' | 'yearly';
+  duration: 'monthly' | 'HalfYear' | 'yearly';
   ideal: string;
   storage?: string;
   features: string[];
@@ -93,9 +93,7 @@ export const getSubscriptions = async (activeOnly: boolean = false): Promise<Sub
 };
 
 
-/**
- * Get a single subscription by ID
- */
+
 export const getSubscriptionById = async (id: string): Promise<Subscription | null> => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
@@ -118,9 +116,7 @@ export const getSubscriptionById = async (id: string): Promise<Subscription | nu
   }
 };
 
-/**
- * Update an existing subscription
- */
+
 export const updateSubscription = async (
   id: string, 
   subscriptionData: Partial<Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>>
@@ -191,7 +187,7 @@ export const toggleSubscriptionStatus = async (id: string, isActive: boolean) =>
 };
 
 
-export const getSubscriptionsByDuration = async (duration: 'monthly' | 'six-month' | 'yearly'): Promise<Subscription[]> => {
+export const getSubscriptionsByDuration = async (duration: 'monthly' | 'HalfYear' | 'yearly'): Promise<Subscription[]> => {
   try {
     const q = query(
       collection(db, COLLECTION_NAME),

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ActionIcon, TextInput } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { IconSearch, IconX } from "@tabler/icons-react";
+import { IconSearch, IconX, IconEye } from "@tabler/icons-react";
 import { ToastContainer, toast } from "react-toastify";
 import ConfirmDialog from "../../components/dialogs/ConfirmDialog"; 
 import { useNavigate } from "react-router-dom";
@@ -11,69 +11,72 @@ import type {
 } from "mantine-datatable";
 import { DataTable } from "mantine-datatable";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { FiEdit } from "react-icons/fi";
 import Dropdown from "../../layouts/Dropdown"; 
 import "@mantine/core/styles.css";
 import "mantine-datatable/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosArrowDown } from "react-icons/io";
 import Swal from "sweetalert2";
-import { FaPlus, FaCrown, FaFire } from "react-icons/fa";
-import { 
-  getSubscriptions, 
-  deleteSubscription, 
-  type Subscription 
-} from "../../api/services/subscriptionService";
+import {  FaCrown, FaGoogle } from "react-icons/fa";
+import { MdEmail, MdPhone, MdBusiness, MdLocationOn } from "react-icons/md";
 
-const SubscriptionsList: React.FC = () => {
+import { 
+  getUsers, 
+  deleteUser, 
+  type User 
+} from "../../api/services/userService";
+
+const UsersList: React.FC = () => {
   const navigate = useNavigate();
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const PAGE_SIZES = [10, 20, 30, 50, 100];
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-  const [records, setRecords] = useState<Subscription[]>([]);
+  const [records, setRecords] = useState<User[]>([]);
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebouncedValue(query, 200);
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Subscription>>({
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<User>>({
     columnAccessor: "name",
     direction: "asc",
   });
-  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchSubscriptions();
+    fetchUsers();
   }, []);
 
-  const fetchSubscriptions = async () => {
+  const fetchUsers = async () => {
     setLoading(true);
     try {
-      const subscriptionsData = await getSubscriptions(false); // Get all subscriptions from Firebase
-      setSubscriptions(subscriptionsData);
-      setRecords(subscriptionsData);
+      const usersData = await getUsers(false); // Using real service function
+      setUsers(usersData);
+      setRecords(usersData);
       
-      if (subscriptionsData.length === 0) {
-        console.log("No subscriptions found in Firebase collection");
+      if (usersData.length === 0) {
+        console.log("No users found in Firebase collection");
       } else {
-        console.log(`Loaded ${subscriptionsData.length} subscriptions from Firebase:`, subscriptionsData);
+        console.log(`Loaded ${usersData.length} users from Firebase:`, usersData);
       }
     } catch (error) {
-      console.error("Error fetching subscriptions:", error);
-      toast.error("Failed to fetch subscriptions");
+      console.error("Error fetching users:", error);
+      toast.error("Failed to fetch users");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const filteredData = subscriptions.filter(({ name, ideal, duration, storage }) =>
+    const filteredData = users.filter(({ name, email, phoneNumber, companyName, industry, subscription }) =>
       name.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-      ideal.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-      duration.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-      storage?.toLowerCase().includes(debouncedQuery.toLowerCase())
+      email.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      phoneNumber.includes(debouncedQuery) ||
+      companyName?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      industry?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      subscription.planName.toLowerCase().includes(debouncedQuery.toLowerCase())
     );
 
     const sortedData = filteredData.sort((a: any, b: any) => {
@@ -97,31 +100,33 @@ const SubscriptionsList: React.FC = () => {
     });
 
     setRecords(sortedData.slice((page - 1) * pageSize, page * pageSize));
-  }, [subscriptions, debouncedQuery, sortStatus, page, pageSize]);
+  }, [users, debouncedQuery, sortStatus, page, pageSize]);
 
-  const handleEdit = (id: string) => {
-    navigate(`/admin/edit-subscription/${id}`);
-  };
+const handleView = (id: string) => {
+  console.log("Navigating to:", `/admin/view-user/${id}`);
+  navigate(`/admin/view-user/${id}`);
+};
+
 
   const handleDelete = async () => {
-    if (!selectedSubscriptionId) return;
+    if (!selectedUserId) return;
 
     try {
-      const result = await deleteSubscription(selectedSubscriptionId);
+      const result = await deleteUser(selectedUserId); // Using real service function
       if (result.success) {
-        setSubscriptions((prevSubscriptions) =>
-          prevSubscriptions.filter((subscription) => subscription.id !== selectedSubscriptionId)
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== selectedUserId)
         );
-        toast.success("Subscription deleted successfully!");
+        toast.success("User deleted successfully!");
       } else {
-        toast.error(result.message || "Failed to delete subscription");
+        toast.error(result.message || "Failed to delete user");
       }
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Failed to delete subscription. Please try again.");
+      toast.error("Failed to delete user. Please try again.");
     } finally {
       setIsDialogOpen(false);
-      setSelectedSubscriptionId(null);
+      setSelectedUserId(null);
     }
   };
 
@@ -148,19 +153,19 @@ const SubscriptionsList: React.FC = () => {
       });
       
       if (confirmation.isConfirmed) {
-        setSubscriptions((prev) =>
-          prev.filter((subscription) => !selectedRecords.includes(subscription.id as any))
+        setUsers((prev) =>
+          prev.filter((user) => !selectedRecords.includes(user.id as any))
         );
         toast.success("Records deleted successfully!");
         setSelectedRecords([]);
       }
     } else if (selectedOption === "edit" && selectedRecords.length === 1) {
-      navigate(`/admin/edit-subscription/${selectedRecords[0]}`);
+      navigate(`/admin/edit-user/${selectedRecords[0]}`);
     }
   };
 
   const openDialog = (id: string) => {
-    setSelectedSubscriptionId(id);
+    setSelectedUserId(id);
     setIsDialogOpen(true);
   };
 
@@ -180,19 +185,31 @@ const SubscriptionsList: React.FC = () => {
     }
   };
 
-  const handleCreate = () => {
-    navigate("/admin/create-subscription");
+  const formatDate = (date: any) => {
+    if (!date) return "N/A";
+    return new Date(date.seconds ? date.seconds * 1000 : date).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const formatPrice = (price: number, duration: string) => {
-    if (price === 0) return "Free";
-    const currency = "₹";
-    const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/6 months" : "/year";
-    return `${currency}${price.toLocaleString()}${durationLabel}`;
+  const getSubscriptionStatus = (expiresAt: string) => {
+    const expiryDate = new Date(expiresAt);
+    const now = new Date();
+    const isExpired = expiryDate < now;
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      isExpired,
+      daysLeft,
+      status: isExpired ? 'Expired' : daysLeft <= 7 ? 'Expiring Soon' : 'Active'
+    };
   };
 
-  const columns: DataTableColumn<Subscription>[] = [
+  const columns: DataTableColumn<User>[] = [
     {
       accessor: "select",
       title: (
@@ -220,12 +237,12 @@ const SubscriptionsList: React.FC = () => {
       render: ({ id }) => (
         <div className="flex items-center space-x-1">
           <ActionIcon
-            onClick={() => handleEdit(id as any)}
-            title="Edit"
-            className="text-blue-500"
+            onClick={() => handleView(id as any)}
+            title="View Details"
+            className="text-green-500"
             variant="transparent"
           >
-            <FiEdit />
+            <IconEye />
           </ActionIcon>
           <ActionIcon
             onClick={() => openDialog(id as any)}
@@ -239,74 +256,106 @@ const SubscriptionsList: React.FC = () => {
       ),
     },
     { 
-      accessor: "name", 
-      title: "Plan Name",
-      render: ({ name, mostPopular }) => (
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">{name}</span>
-          {mostPopular && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-600 text-xs font-medium rounded-full">
-              <FaFire className="w-3 h-3" />
-              Popular
-            </span>
-          )}
-          {name === "Pro" && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-600 text-xs font-medium rounded-full">
-              <FaCrown className="w-3 h-3" />
-              Pro
-            </span>
+      accessor: "profile", 
+      title: "User Profile",
+      render: ({ name, email, photoURL, provider }) => (
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <img
+              src={photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`}
+              alt={name}
+              className="w-10 h-10 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+              }}
+            />
+            {provider === 'google.com' && (
+              <FaGoogle className="absolute -bottom-1 -right-1 w-4 h-4 text-red-500 bg-white rounded-full p-0.5" />
+            )}
+          </div>
+          <div>
+            <p className="font-semibold text-sm">{name}</p>
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <MdEmail className="w-3 h-3" />
+              {email}
+            </p>
+          </div>
+        </div>
+      )
+    },
+    { 
+      accessor: "phoneNumber", 
+      title: "Phone",
+      render: ({ phoneNumber }) => (
+        <span className="flex items-center gap-1 text-sm">
+          <MdPhone className="w-3 h-3 text-gray-400" />
+          {phoneNumber || "N/A"}
+        </span>
+      )
+    },
+    { 
+      accessor: "location", 
+      title: "Location",
+      render: ({ city, state, country }) => (
+        <div className="text-sm">
+          <span className="flex items-center gap-1">
+            <MdLocationOn className="w-3 h-3 text-gray-400" />
+            {[city, state, country].filter(Boolean).join(', ') || "N/A"}
+          </span>
+        </div>
+      )
+    },
+    { 
+      accessor: "company", 
+      title: "Company & Industry",
+      render: ({ companyName, industry }) => (
+        <div className="text-sm">
+          <p className="flex items-center gap-1 font-medium">
+            <MdBusiness className="w-3 h-3 text-gray-400" />
+            {companyName || "N/A"}
+          </p>
+          {industry && (
+            <p className="text-xs text-gray-500">{industry}</p>
           )}
         </div>
       )
     },
     { 
-      accessor: "price", 
-      title: "Price",
-      render: ({ price, duration }) => (
-        <span className="font-semibold text-green-600">
-          {formatPrice(price, duration)}
-        </span>
-      )
-    },
-    { 
-      accessor: "duration", 
-      title: "Duration",
-      render: ({ duration }) => (
-        <span className="capitalize px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
-          {duration === "HalfYear" ? "6 Months" : duration}
-        </span>
-      )
-    },
-    { 
-      accessor: "storage", 
-      title: "Storage",
-      render: ({ storage, features }) => (
-        <span className="text-sm">
-          {storage || features.find(f => f.includes("Storage"))?.split(" - ")[1] || "N/A"}
-        </span>
-      )
-    },
-    { 
-      accessor: "ideal", 
-      title: "Description",
-      render: ({ ideal }) => (
-        <span className="text-sm text-gray-600 max-w-xs truncate block">
-          {ideal}
-        </span>
-      )
+      accessor: "subscription", 
+      title: "Subscription",
+      render: ({ subscription }) => {
+        const subStatus = getSubscriptionStatus(subscription.expires_at);
+        return (
+          <div className="text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold flex items-center gap-1">
+                {subscription.planName === 'Pro' && <FaCrown className="w-3 h-3 text-purple-500" />}
+                {subscription.planName}
+              </span>
+              <span className="text-xs text-gray-500">({subscription.billing})</span>
+            </div>
+            <span
+              className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                subStatus.status === 'Active'
+                  ? "bg-green-100 text-green-800"
+                  : subStatus.status === 'Expiring Soon'
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {subStatus.status}
+              {!subStatus.isExpired && ` (${subStatus.daysLeft}d)`}
+            </span>
+          </div>
+        );
+      }
     },
     {
-      accessor: "isActive",
-      title: "Status",
-      render: ({ isActive }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            isActive
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {isActive ? "Active" : "Inactive"}
+      accessor: "createdAt",
+      title: "Joined Date",
+      render: ({ createdAt }) => (
+        <span className="text-sm text-gray-600">
+          {formatDate(createdAt)}
         </span>
       ),
     },
@@ -317,7 +366,7 @@ const SubscriptionsList: React.FC = () => {
       <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#FFD426] border-b-4 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading Subscriptions...</p>
+          <p className="text-gray-300">Loading Users...</p>
         </div>
       </div>
     );
@@ -327,20 +376,13 @@ const SubscriptionsList: React.FC = () => {
     <div className="p-6 bg-gray-100 min-h-screen">
       <ToastContainer />
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Subscription Plans</h2>
+        <h2 className="text-2xl font-bold">Users Management</h2>
         <div className="text-sm text-gray-600">
-          Total Plans: {subscriptions.length}
+          Total Users: {users.length}
         </div>
       </div>
 
       <div className="flex flex-wrap justify-between gap-4 mb-4">
-        <button
-          className="flex-1 h-11 bg-[#FFD426] text-black rounded-md hover:bg-[#e6b800] transition flex items-center justify-center font-semibold"
-          onClick={handleCreate}
-        >
-          <FaPlus className="mr-2" /> Add Subscription Plan
-        </button>
-
         <div className="flex-1">
           <Dropdown
             btnClassName="w-full flex items-center border border-gray-300 rounded-md px-4 py-2 text-sm bg-white shadow-sm hover:bg-gray-100"
@@ -380,7 +422,7 @@ const SubscriptionsList: React.FC = () => {
         </div>
 
         <TextInput
-          placeholder="Search subscriptions..."
+          placeholder="Search users..."
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           leftSection={<IconSearch size={16} />}
@@ -406,20 +448,19 @@ const SubscriptionsList: React.FC = () => {
             <option value="">Action Dropdown</option>
             <option value="edit">Edit</option>
             <option value="delete">Delete</option>
-            <option value="activate">Activate</option>
-            <option value="deactivate">Deactivate</option>
+            <option value="export">Export</option>
           </select>
         </div>
       </div>
 
-      <DataTable<Subscription>
+      <DataTable<User>
         className="whitespace-nowrap"
         records={records}
         columns={columns.filter(
           (col) => !hiddenColumns.includes(col.accessor as string)
         )}
         highlightOnHover
-        totalRecords={subscriptions.length}
+        totalRecords={users.length}
         recordsPerPage={pageSize}
         page={page}
         onPageChange={setPage}
@@ -437,11 +478,11 @@ const SubscriptionsList: React.FC = () => {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onConfirm={handleDelete}
-        title="Delete Subscription"
-        message="Are you sure you want to delete this subscription plan? This action cannot be undone."
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
       />
     </div>
   );
 };
 
-export default SubscriptionsList;
+export default UsersList;

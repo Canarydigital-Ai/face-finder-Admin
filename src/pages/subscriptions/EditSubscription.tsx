@@ -11,7 +11,7 @@ const EditSubscription: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
-    duration: "monthly" as 'monthly' | 'six-month' | 'yearly',
+    duration: "monthly" as 'monthly' | 'HalfYear' | 'yearly',
     ideal: "",
     storage: "",
     features: [""],
@@ -170,7 +170,7 @@ const EditSubscription: React.FC = () => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "six-month" ? "/6 months" : "/year";
+                         duration === "HalfYear" ? "/6 months" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
@@ -250,7 +250,7 @@ const EditSubscription: React.FC = () => {
                 required
               >
                 <option value="monthly">Monthly</option>
-                <option value="six-month">6 Months</option>
+                <option value="HalfYear">Half Year</option>
                 <option value="yearly">Yearly</option>
               </select>
             </div>

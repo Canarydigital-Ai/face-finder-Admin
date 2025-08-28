@@ -25,7 +25,7 @@ const SidebarLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+     <div className="flex min-h-screen bg-[#0F0F0F]"> 
       {/* Sidebar - Fixed width that changes based on collapsed state */}
       <div className={`fixed left-0 top-0 h-full z-20 transition-all duration-500 ${
         isCollapsed ? 'w-[70px]' : 'w-[280px]'
@@ -42,15 +42,15 @@ const SidebarLayout: React.FC = () => {
       )}
 
       {/* Main Content Area - Dynamic margin based on sidebar state */}
-      <div 
-        className={`flex-1 transition-all duration-500 ${
-          isMobile 
-            ? 'ml-0' 
-            : isCollapsed 
-              ? 'ml-[70px]' 
-              : 'ml-[280px]'
-        }`}
-      >
+       <div 
+      className={`flex-1 transition-all duration-500 bg-[#0F0F0F] ${
+        isMobile 
+          ? 'ml-0' 
+          : isCollapsed 
+            ? 'ml-[70px]' 
+            : 'ml-[280px]'
+      }`}
+    >
         {/* Mobile hamburger menu button */}
         {isMobile && (
           <button
@@ -75,7 +75,7 @@ const SidebarLayout: React.FC = () => {
         )}
 
         {/* Main content */}
-        <main className="min-h-screen">
+        <main className="min-h-screen bg-[#0F0F0F]">
           <div className="p-4 lg:p-6">
             <Outlet />
           </div>

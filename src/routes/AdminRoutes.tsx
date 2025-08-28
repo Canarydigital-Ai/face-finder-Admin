@@ -10,6 +10,8 @@ const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const SubscriptionsList = lazy(() => import("../pages/subscriptions/SubscriptionList"));
 const CreateSubscription = lazy(() => import("../pages/subscriptions/CreateSubscription"));
 const EditSubscription = lazy(() => import("../pages/subscriptions/EditSubscription"));
+const UsersList = lazy(() => import("../pages/users/UserList"));
+const UserView = lazy(() => import("../pages/users/UserViewDetails"));
 
 
 
@@ -17,7 +19,7 @@ const AdminLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-100">
     <div className="text-center">
       <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-b-4 mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading Admin Panel...</p>
+      <p className="text-white-600">Loading Admin Panel...</p>
     </div>
   </div>
 );
@@ -43,6 +45,8 @@ const AdminRoutes: React.FC = memo(() => {
                   <Route path="/subscriptions-list" element={<SubscriptionsList />} />
                   <Route path="/create-subscription" element={<CreateSubscription />} />
                   <Route path="/edit-subscription/:id" element={<EditSubscription />} />
+                  <Route path="/users" element={<UsersList />} />
+<Route path="/view-user/:id" element={<UserView />} />
 
 
                 </Route>

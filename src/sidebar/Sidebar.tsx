@@ -9,6 +9,7 @@ import {
   FaChevronLeft,
   FaChevronRight
 } from 'react-icons/fa';
+import { GiBrain } from "react-icons/gi";
 import { clearAdminAuth } from '../store/slices/adminSlice';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAppDispatch } from '../hooks/redux';
@@ -78,11 +79,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
       color: '#10B981'
     },
     {
-      name: 'Events',
+      name: 'Users',
       icon: <FaBuilding size={20} />,
-      route: '/admin/departments-list',
+      route: '/admin/users',
       color: '#F59E0B'
-    },
+    }, 
+    {
+      name: 'AI Settings',
+      icon: <GiBrain  size={22} />,
+      route: '/admin/ai-settings',
+      color: '#FFE100'
+    }
   ];
 
   const handleSelect = (item: MenuItem) => {
