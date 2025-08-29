@@ -88,7 +88,7 @@ const CreateSubscription: React.FC = () => {
       const subscriptionData = {
         name: formData.name.trim(),
         price: formData.price,
-        duration: formData.duration as "monthly" | "HalfYear" | "yearly",
+        duration: formData.duration as "monthly" | "half-year" | "yearly",
         ideal: formData.ideal.trim(),
         storage: formData.storage.trim() || undefined,
         features: formData.features.filter((f) => f.trim()),
@@ -142,8 +142,8 @@ const CreateSubscription: React.FC = () => {
     const durationLabel =
       duration === "monthly"
         ? "/month"
-        : duration === "HalfYear"
-        ? "/HalfYear"
+        : duration === "half-year"
+        ? "/half-year"
         : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
@@ -168,7 +168,7 @@ const CreateSubscription: React.FC = () => {
       value: formData.duration,
       options: [
         { value: "monthly", label: "Monthly" },
-        { value: "HalfYear", label: "HalfYear" },
+        { value: "half-year", label: "half-year" },
         { value: "yearly", label: "Yearly" },
       ],
       required: true,
