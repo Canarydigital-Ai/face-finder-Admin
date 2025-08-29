@@ -17,9 +17,8 @@ import "mantine-datatable/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosArrowDown } from "react-icons/io";
 import Swal from "sweetalert2";
-import {  FaCrown, FaGoogle } from "react-icons/fa";
+import { FaCrown, FaGoogle } from "react-icons/fa";
 import { MdEmail, MdPhone, MdBusiness, MdLocationOn } from "react-icons/md";
-
 import { 
   getUsers, 
   deleteUser, 
@@ -52,7 +51,7 @@ const UsersList: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const usersData = await getUsers(false); // Using real service function
+      const usersData = await getUsers(false);
       setUsers(usersData);
       setRecords(usersData);
       
@@ -102,17 +101,16 @@ const UsersList: React.FC = () => {
     setRecords(sortedData.slice((page - 1) * pageSize, page * pageSize));
   }, [users, debouncedQuery, sortStatus, page, pageSize]);
 
-const handleView = (id: string) => {
-  console.log("Navigating to:", `/admin/view-user/${id}`);
-  navigate(`/admin/view-user/${id}`);
-};
-
+  const handleView = (id: string) => {
+    console.log("Navigating to:", `/admin/view-user/${id}`);
+    navigate(`/admin/view-user/${id}`);
+  };
 
   const handleDelete = async () => {
     if (!selectedUserId) return;
 
     try {
-      const result = await deleteUser(selectedUserId); // Using real service function
+      const result = await deleteUser(selectedUserId);
       if (result.success) {
         setUsers((prevUsers) =>
           prevUsers.filter((user) => user.id !== selectedUserId)
@@ -219,7 +217,7 @@ const handleView = (id: string) => {
             selectedRecords.length === records.length && records.length > 0
           }
           onChange={handleSelectAllRecords}
-          className="w-5 h-5"
+          className="w-5 h-5 border-gray-600 bg-gray-800 rounded my-2"
         />
       ),
       render: ({ id } ) => (
@@ -227,7 +225,7 @@ const handleView = (id: string) => {
           type="checkbox"
           checked={selectedRecords.includes(id as any)}
           onChange={() => handleSelectRecord(id as any)}
-          className="w-5 h-5"
+          className="w-5 h-5 border-gray-600 bg-gray-800 rounded"
         />
       ),
     },
@@ -235,20 +233,20 @@ const handleView = (id: string) => {
       accessor: "actions",
       title: "Actions",
       render: ({ id }) => (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 py-2">
           <ActionIcon
             onClick={() => handleView(id as any)}
             title="View Details"
-            className="text-green-500"
-            variant="transparent"
+            className="text-yellow-400 hover:text-yellow-300 bg-gray-800 hover:bg-gray-700"
+            variant="filled"
           >
             <IconEye />
           </ActionIcon>
           <ActionIcon
             onClick={() => openDialog(id as any)}
             title="Delete"
-            className="text-red-500"
-            variant="transparent"
+            className="text-red-400 hover:text-red-300 bg-gray-800 hover:bg-gray-700"
+            variant="filled"
           >
             <RiDeleteBin6Line />
           </ActionIcon>
@@ -274,8 +272,8 @@ const handleView = (id: string) => {
             )}
           </div>
           <div>
-            <p className="font-semibold text-sm">{name}</p>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+            <p className="font-semibold text-sm text-white">{name}</p>
+            <p className="text-xs text-gray-300 flex items-center gap-1">
               <MdEmail className="w-3 h-3" />
               {email}
             </p>
@@ -287,7 +285,7 @@ const handleView = (id: string) => {
       accessor: "phoneNumber", 
       title: "Phone",
       render: ({ phoneNumber }) => (
-        <span className="flex items-center gap-1 text-sm">
+        <span className="flex items-center gap-1 text-sm text-white">
           <MdPhone className="w-3 h-3 text-gray-400" />
           {phoneNumber || "N/A"}
         </span>
@@ -298,7 +296,7 @@ const handleView = (id: string) => {
       title: "Location",
       render: ({ city, state, country }) => (
         <div className="text-sm">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 text-white">
             <MdLocationOn className="w-3 h-3 text-gray-400" />
             {[city, state, country].filter(Boolean).join(', ') || "IN"}
           </span>
@@ -310,12 +308,12 @@ const handleView = (id: string) => {
       title: "Company & Industry",
       render: ({ companyName, industry }) => (
         <div className="text-sm">
-          <p className="flex items-center gap-1 font-medium">
+          <p className="flex items-center gap-1 font-medium text-white">
             <MdBusiness className="w-3 h-3 text-gray-400" />
             {companyName || "Canary Digital"}
           </p>
           {industry && (
-            <p className="text-xs text-gray-500">{industry}</p>
+            <p className="text-xs text-gray-300">{industry}</p>
           )}
         </div>
       )
@@ -328,19 +326,19 @@ const handleView = (id: string) => {
         return (
           <div className="text-sm">
             <div className="flex items-center gap-2">
-              <span className="font-semibold flex items-center gap-1">
-                {subscription.planName === 'Pro' && <FaCrown className="w-3 h-3 text-purple-500" />}
+              <span className="font-semibold flex items-center gap-1 text-white">
+                {subscription.planName === 'Pro' && <FaCrown className="w-3 h-3 text-purple-400" />}
                 {subscription.planName}
               </span>
-              <span className="text-xs text-gray-500">({subscription.billing})</span>
+              <span className="text-xs text-gray-300">({subscription.billing})</span>
             </div>
             <span
               className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
                 subStatus.status === 'Active'
-                  ? "bg-green-100 text-green-800"
+                  ? "bg-green-500 text-white"
                   : subStatus.status === 'Expiring Soon'
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-red-100 text-red-800"
+                  ? "bg-yellow-500 text-black"
+                  : "bg-red-500 text-white"
               }`}
             >
               {subStatus.status}
@@ -354,7 +352,7 @@ const handleView = (id: string) => {
       accessor: "createdAt",
       title: "Joined Date",
       render: ({ createdAt }) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-gray-300">
           {formatDate(createdAt)}
         </span>
       ),
@@ -373,11 +371,11 @@ const handleView = (id: string) => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="">
       <ToastContainer />
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Users Management</h2>
-        <div className="text-sm text-gray-600">
+        <h2 className="text-3xl font-bold text-[#FFD426] mb-3">Users Management</h2>
+        <div className="text-sm text-gray-400">
           Total Users: {users.length}
         </div>
       </div>
@@ -385,7 +383,7 @@ const handleView = (id: string) => {
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1">
           <Dropdown
-            btnClassName="w-full flex items-center border border-gray-300 rounded-md px-4 py-2 text-sm bg-white shadow-sm hover:bg-gray-100"
+            btnClassName="w-full flex items-center border border-gray-600 rounded-md px-4 py-2 text-sm bg-gray-800 text-white shadow-sm hover:bg-gray-700"
             button={
               <>
                 <span className="mr-1">Columns</span>
@@ -393,20 +391,20 @@ const handleView = (id: string) => {
               </>
             }
           >
-            <div className="absolute z-10 bg-white bg-opacity-80 rounded-md shadow-md p-4">
+            <div className="absolute z-10 bg-gray-800 bg-opacity-95 rounded-md shadow-md p-4">
               <ul className="min-w-[300px] max-h-60 overflow-y-auto">
                 {columns
                   .filter((col) => col.accessor !== "select")
                   .map((col, index) => (
                     <li key={index} className="flex flex-col">
                       <div className="flex items-center px-4 py-1">
-                        <label className="cursor-pointer mb-0">
+                        <label className="cursor-pointer mb-0 text-white">
                           <input
                             type="checkbox"
                             checked={
                               !hiddenColumns.includes(col.accessor as string)
                             }
-                            className="mr-2"
+                            className="mr-2 text-yellow-500"
                             onChange={() =>
                               toggleColumnVisibility(col.accessor as string)
                             }
@@ -425,22 +423,34 @@ const handleView = (id: string) => {
           placeholder="Search users..."
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
-          leftSection={<IconSearch size={16} />}
+          leftSection={<IconSearch size={16} className="text-gray-400" />}
           rightSection={
             <ActionIcon
               size="sm"
               variant="transparent"
               onClick={() => setQuery("")}
+              className="text-gray-400"
             >
               <IconX size={14} />
             </ActionIcon>
           }
-          className="flex-1"
+          className="flex-1 bg-gray-800 border-gray-600 text-white"
+          styles={{
+            input: {
+              backgroundColor: '#1e2939',
+              height: '44px',
+              borderColor: '#333',
+              color: 'white',
+              '&::placeholder': {
+                color: '#999',
+              },
+            },
+          }}
         />
 
         <div className="flex-1">
           <select
-            className="form-select border border-gray-300 rounded-md px-4 py-2 text-sm bg-white shadow-sm hover:bg-gray-100 w-full"
+            className="form-select border border-gray-600 rounded-md px-4 py-2 text-sm bg-gray-800 text-white shadow-sm hover:bg-gray-700 w-full"
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               handleSelectChange(e.target.value)
             }
@@ -453,26 +463,48 @@ const handleView = (id: string) => {
         </div>
       </div>
 
-      <DataTable<User>
-        className="whitespace-nowrap"
-        records={records}
-        columns={columns.filter(
-          (col) => !hiddenColumns.includes(col.accessor as string)
-        )}
-        highlightOnHover
-        totalRecords={users.length}
-        recordsPerPage={pageSize}
-        page={page}
-        onPageChange={setPage}
-        recordsPerPageOptions={PAGE_SIZES}
-        onRecordsPerPageChange={setPageSize}
-        sortStatus={sortStatus}
-        onSortStatusChange={setSortStatus}
-        minHeight={200}
-        paginationText={({ from, to, totalRecords }) =>
-          `Showing ${from} to ${to} of ${totalRecords} entries`
-        }
-      />
+      {/* DataTable with black and yellow theme */}
+      <div className="border-1 border-[#ffffff5b] rounded-lg bg-[#1A1A1A] overflow-hidden ">
+        <DataTable<User>
+          className="whitespace-nowrap"
+          records={records}
+          columns={columns.filter(
+            (col) => !hiddenColumns.includes(col.accessor as string)
+          )} 
+          totalRecords={users.length}
+          recordsPerPage={pageSize}
+          page={page}
+          onPageChange={setPage}
+          recordsPerPageOptions={PAGE_SIZES}
+          onRecordsPerPageChange={setPageSize}
+          sortStatus={sortStatus}
+          onSortStatusChange={setSortStatus}
+          minHeight={200}
+          paginationText={({ from, to, totalRecords }) => (
+            <span className="text-[#FCCA00]">
+              Showing {from} to {to} of {totalRecords} entries
+            </span>
+          )}
+          styles={{
+            root: {
+              backgroundColor: '#000000',
+            },
+            table: {
+              backgroundColor: '#1A1A1A',
+            },
+            header: {
+              backgroundColor: '#1A1A1A',
+              color: '#FCCA00',
+              fontSize: '16px',
+            },
+            pagination: {
+              backgroundColor: '#1A1A1A',
+              color: '#FFD426', 
+              fontSize: '16px', 
+            },
+          }}
+        />
+      </div>
 
       <ConfirmDialog
         isOpen={isDialogOpen}
