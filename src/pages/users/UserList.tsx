@@ -300,7 +300,7 @@ const handleView = (id: string) => {
         <div className="text-sm">
           <span className="flex items-center gap-1">
             <MdLocationOn className="w-3 h-3 text-gray-400" />
-            {[city, state, country].filter(Boolean).join(', ') || "N/A"}
+            {[city, state, country].filter(Boolean).join(', ') || "IN"}
           </span>
         </div>
       )
@@ -312,7 +312,7 @@ const handleView = (id: string) => {
         <div className="text-sm">
           <p className="flex items-center gap-1 font-medium">
             <MdBusiness className="w-3 h-3 text-gray-400" />
-            {companyName || "N/A"}
+            {companyName || "Canary Digital"}
           </p>
           {industry && (
             <p className="text-xs text-gray-500">{industry}</p>
