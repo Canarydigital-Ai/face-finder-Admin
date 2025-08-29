@@ -188,7 +188,7 @@ const SubscriptionsList: React.FC = () => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/Half Year" : "/year";
+                         duration === "half-year" ? "/Half Year" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
@@ -273,7 +273,7 @@ const SubscriptionsList: React.FC = () => {
       title: "Duration",
       render: ({ duration }) => (
         <span className="capitalize px-4 py-2 bg-yellow-500 text-black text-xs font-medium rounded-full">
-          {duration === "HalfYear" ? "Half Year" : duration}
+          {duration === "half-year" ? "Half Year" : duration}
         </span>
       )
     },
@@ -324,7 +324,7 @@ const SubscriptionsList: React.FC = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="">
       <ToastContainer />
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold text-[#FFD426] mb-3">Subscription Plans</h2>

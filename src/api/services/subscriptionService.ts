@@ -17,7 +17,7 @@ export interface Subscription {
   id?: string;
   name: string;
   price: number;
-  duration: 'monthly' | 'HalfYear' | 'yearly';
+  duration: 'monthly' | 'half-year' | 'yearly';
   ideal: string;
   storage?: string;
   features: string[];
@@ -187,7 +187,7 @@ export const toggleSubscriptionStatus = async (id: string, isActive: boolean) =>
 };
 
 
-export const getSubscriptionsByDuration = async (duration: 'monthly' | 'HalfYear' | 'yearly'): Promise<Subscription[]> => {
+export const getSubscriptionsByDuration = async (duration: 'monthly' | 'half-year' | 'yearly'): Promise<Subscription[]> => {
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
