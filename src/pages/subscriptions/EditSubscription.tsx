@@ -170,7 +170,7 @@ const EditSubscription: React.FC = () => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/6 months" : "/year";
+                         duration === "HalfYear" ? "/HalfYear" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 

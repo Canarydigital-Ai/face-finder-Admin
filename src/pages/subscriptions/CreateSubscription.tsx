@@ -144,7 +144,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/6 months" : "/year";
+                         duration === "HalfYear" ? "/HalfYear" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
@@ -193,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 required
               >
                 <option value="monthly">Monthly</option>
-                <option value="HalfYear">6 Months</option>
+                <option value="HalfYear">HalfYear</option>
                 <option value="yearly">Yearly</option>
               </select>
             </div>
