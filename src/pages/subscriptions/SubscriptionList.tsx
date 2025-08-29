@@ -51,7 +51,7 @@ const SubscriptionsList: React.FC = () => {
   const fetchSubscriptions = async () => {
     setLoading(true);
     try {
-      const subscriptionsData = await getSubscriptions(false); // Get all subscriptions from Firebase
+      const subscriptionsData = await getSubscriptions(false);
       setSubscriptions(subscriptionsData);
       setRecords(subscriptionsData);
       
@@ -188,7 +188,7 @@ const SubscriptionsList: React.FC = () => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/6 months" : "/year";
+                         duration === "HalfYear" ? "/Half Year" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
@@ -202,7 +202,7 @@ const SubscriptionsList: React.FC = () => {
             selectedRecords.length === records.length && records.length > 0
           }
           onChange={handleSelectAllRecords}
-          className="w-5 h-5"
+          className="w-5 h-5  border-gray-600 bg-gray-800 rounded my-2"
         />
       ),
       render: ({ id } ) => (
@@ -210,7 +210,7 @@ const SubscriptionsList: React.FC = () => {
           type="checkbox"
           checked={selectedRecords.includes(id as any)}
           onChange={() => handleSelectRecord(id as any)}
-          className="w-5 h-5"
+          className="w-5 h-5 border-gray-600 bg-gray-800 rounded"
         />
       ),
     },
@@ -218,20 +218,20 @@ const SubscriptionsList: React.FC = () => {
       accessor: "actions",
       title: "Actions",
       render: ({ id }) => (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 py-2">
           <ActionIcon
             onClick={() => handleEdit(id as any)}
             title="Edit"
-            className="text-blue-500"
-            variant="transparent"
+            className="text-yellow-400 hover:text-yellow-300 bg-gray-800 hover:bg-gray-700"
+            variant="filled"
           >
             <FiEdit />
           </ActionIcon>
           <ActionIcon
             onClick={() => openDialog(id as any)}
             title="Delete"
-            className="text-red-500"
-            variant="transparent"
+            className="text-red-400 hover:text-red-300 bg-gray-800 hover:bg-gray-700"
+            variant="filled"
           >
             <RiDeleteBin6Line />
           </ActionIcon>
@@ -243,15 +243,15 @@ const SubscriptionsList: React.FC = () => {
       title: "Plan Name",
       render: ({ name, mostPopular }) => (
         <div className="flex items-center gap-2">
-          <span className="font-semibold">{name}</span>
+          <span className="font-semibold text-white">{name}</span>
           {mostPopular && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-600 text-xs font-medium rounded-full">
+            <span className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-black text-xs font-medium rounded-full">
               <FaFire className="w-3 h-3" />
               Popular
             </span>
           )}
           {name === "Pro" && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-600 text-xs font-medium rounded-full">
+            <span className="flex items-center gap-1 px-2 py-1 bg-purple-500 text-white text-xs font-medium rounded-full">
               <FaCrown className="w-3 h-3" />
               Pro
             </span>
@@ -263,7 +263,7 @@ const SubscriptionsList: React.FC = () => {
       accessor: "price", 
       title: "Price",
       render: ({ price, duration }) => (
-        <span className="font-semibold text-green-600">
+        <span className="font-medium text-[#FCCA00]">
           {formatPrice(price, duration)}
         </span>
       )
@@ -272,8 +272,8 @@ const SubscriptionsList: React.FC = () => {
       accessor: "duration", 
       title: "Duration",
       render: ({ duration }) => (
-        <span className="capitalize px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
-          {duration === "HalfYear" ? "6 Months" : duration}
+        <span className="capitalize px-4 py-2 bg-yellow-500 text-black text-xs font-medium rounded-full">
+          {duration === "HalfYear" ? "Half Year" : duration}
         </span>
       )
     },
@@ -281,7 +281,7 @@ const SubscriptionsList: React.FC = () => {
       accessor: "storage", 
       title: "Storage",
       render: ({ storage, features }) => (
-        <span className="text-sm">
+        <span className="text-sm text-white">
           {storage || features.find(f => f.includes("Storage"))?.split(" - ")[1] || "N/A"}
         </span>
       )
@@ -290,7 +290,7 @@ const SubscriptionsList: React.FC = () => {
       accessor: "ideal", 
       title: "Description",
       render: ({ ideal }) => (
-        <span className="text-sm text-gray-600 max-w-xs truncate block">
+        <span className="text-sm text-gray-300 max-w-xs truncate block">
           {ideal}
         </span>
       )
@@ -300,10 +300,10 @@ const SubscriptionsList: React.FC = () => {
       title: "Status",
       render: ({ isActive }) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
+          className={`px-4 py-2 rounded-full text-xs font-medium ${
             isActive
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
           }`}
         >
           {isActive ? "Active" : "Inactive"}
@@ -324,11 +324,11 @@ const SubscriptionsList: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <ToastContainer />
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Subscription Plans</h2>
-        <div className="text-sm text-gray-600">
+        <h2 className="text-3xl font-bold text-[#FFD426] mb-3">Subscription Plans</h2>
+        <div className="text-sm text-gray-400">
           Total Plans: {subscriptions.length}
         </div>
       </div>
@@ -343,7 +343,7 @@ const SubscriptionsList: React.FC = () => {
 
         <div className="flex-1">
           <Dropdown
-            btnClassName="w-full flex items-center border border-gray-300 rounded-md px-4 py-2 text-sm bg-white shadow-sm hover:bg-gray-100"
+            btnClassName="w-full flex items-center border border-gray-600 rounded-md px-4 py-2 text-sm bg-gray-800 text-white shadow-sm hover:bg-gray-700"
             button={
               <>
                 <span className="mr-1">Columns</span>
@@ -351,20 +351,20 @@ const SubscriptionsList: React.FC = () => {
               </>
             }
           >
-            <div className="absolute z-10 bg-white bg-opacity-80 rounded-md shadow-md p-4">
+            <div className="absolute z-10 bg-gray-800 bg-opacity-95 rounded-md shadow-md p-4">
               <ul className="min-w-[300px] max-h-60 overflow-y-auto">
                 {columns
                   .filter((col) => col.accessor !== "select")
                   .map((col, index) => (
                     <li key={index} className="flex flex-col">
                       <div className="flex items-center px-4 py-1">
-                        <label className="cursor-pointer mb-0">
+                        <label className="cursor-pointer mb-0 text-white">
                           <input
                             type="checkbox"
                             checked={
                               !hiddenColumns.includes(col.accessor as string)
                             }
-                            className="mr-2"
+                            className="mr-2 text-yellow-500"
                             onChange={() =>
                               toggleColumnVisibility(col.accessor as string)
                             }
@@ -383,22 +383,34 @@ const SubscriptionsList: React.FC = () => {
           placeholder="Search subscriptions..."
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
-          leftSection={<IconSearch size={16} />}
+          leftSection={<IconSearch size={16} className="text-gray-400" />}
           rightSection={
             <ActionIcon
               size="sm"
               variant="transparent"
               onClick={() => setQuery("")}
+              className="text-gray-400"
             >
               <IconX size={14} />
             </ActionIcon>
           }
-          className="flex-1"
+          className="flex-1 bg-gray-800 border-gray-600 text-white"
+          styles={{
+            input: {
+              backgroundColor: '#1e2939',
+              height: '44px',
+              borderColor: '#333',
+              color: 'white',
+              '&::placeholder': {
+                color: '#999',
+              },
+            },
+          }}
         />
 
         <div className="flex-1">
           <select
-            className="form-select border border-gray-300 rounded-md px-4 py-2 text-sm bg-white shadow-sm hover:bg-gray-100 w-full"
+            className="form-select border border-gray-600 rounded-md px-4 py-2 text-sm bg-gray-800 text-white shadow-sm hover:bg-gray-700 w-full"
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               handleSelectChange(e.target.value)
             }
@@ -412,26 +424,48 @@ const SubscriptionsList: React.FC = () => {
         </div>
       </div>
 
-      <DataTable<Subscription>
-        className="whitespace-nowrap"
-        records={records}
-        columns={columns.filter(
-          (col) => !hiddenColumns.includes(col.accessor as string)
-        )}
-        highlightOnHover
-        totalRecords={subscriptions.length}
-        recordsPerPage={pageSize}
-        page={page}
-        onPageChange={setPage}
-        recordsPerPageOptions={PAGE_SIZES}
-        onRecordsPerPageChange={setPageSize}
-        sortStatus={sortStatus}
-        onSortStatusChange={setSortStatus}
-        minHeight={200}
-        paginationText={({ from, to, totalRecords }) =>
-          `Showing ${from} to ${to} of ${totalRecords} entries`
-        }
-      />
+      {/* DataTable with black and yellow theme */}
+      <div className="border-1 border-[#ffffff5b] rounded-lg bg-[#1A1A1A] overflow-hidden ">
+        <DataTable<Subscription>
+          className="whitespace-nowrap"
+          records={records}
+          columns={columns.filter(
+            (col) => !hiddenColumns.includes(col.accessor as string)
+          )} 
+          totalRecords={subscriptions.length}
+          recordsPerPage={pageSize}
+          page={page}
+          onPageChange={setPage}
+          recordsPerPageOptions={PAGE_SIZES}
+          onRecordsPerPageChange={setPageSize}
+          sortStatus={sortStatus}
+          onSortStatusChange={setSortStatus}
+          minHeight={200}
+          paginationText={({ from, to, totalRecords }) => (
+            <span className="text-[#FCCA00]">
+              Showing {from} to {to} of {totalRecords} entries
+            </span>
+          )}
+          styles={{
+            root: {
+              backgroundColor: '#000000',
+            },
+            table: {
+              backgroundColor: '#1A1A1A',
+            },
+            header: {
+              backgroundColor: '#1A1A1A',
+              color: '#FCCA00',
+              fontSize: '16px',
+            },
+            pagination: {
+              backgroundColor: '#1A1A1A',
+              color: '#FFD426', 
+              fontSize: '16px', 
+            },
+          }}
+        />
+      </div>
 
       <ConfirmDialog
         isOpen={isDialogOpen}
