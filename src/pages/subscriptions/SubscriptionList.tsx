@@ -324,7 +324,7 @@ const SubscriptionsList: React.FC = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="">
       <ToastContainer />
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold text-[#FFD426] mb-3">Subscription Plans</h2>
