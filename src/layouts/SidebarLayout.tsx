@@ -75,7 +75,7 @@ const SidebarLayout: React.FC = () => {
         )}
 
         {/* Main content */}
-        <main className="min-h-screen bg-[#0F0F0F]">
+        <main className="h-screen overflow-y-auto scrollbar-hide bg-[#0F0F0F]">
           <div className="p-4 lg:p-6">
             <Outlet />
           </div>
