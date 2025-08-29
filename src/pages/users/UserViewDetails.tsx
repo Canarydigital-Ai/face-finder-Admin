@@ -30,7 +30,8 @@ import {
   Clock4,
   Sparkles,
   TrendingUp,
-  Award
+  Award,
+  Timer
 } from "lucide-react";
 import { MdUpdate } from "react-icons/md";
 import ConfirmDialog from "../../components/dialogs/ConfirmDialog";
@@ -47,6 +48,16 @@ const UserView: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute for live countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -137,37 +148,112 @@ const UserView: React.FC = () => {
       return {
         isExpired: true,
         daysLeft: 0,
-        status: 'No Subscription'
+        hoursLeft: 0,
+        minutesLeft: 0,
+        status: 'No Subscription',
+        timeRemaining: 'No active subscription'
       };
     }
     
     try {
-      const expiryDate = new Date(expiresAt);
-      const now = new Date();
+      // Handle Firebase date format: "September 28, 2025 at 03:11:54 PM UTC+5:30"
+      console.log('Raw expiry date from Firebase:', expiresAt);
       
-      // Check if date is valid
-      if (isNaN(expiryDate.getTime())) {
+      // Parse the date manually to avoid timezone issues
+      const dateMatch = expiresAt.match(/(\w+)\s+(\d{1,2}),\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)/);
+      
+      if (!dateMatch) {
+        console.error('Date format does not match expected pattern:', expiresAt);
         return {
           isExpired: true,
           daysLeft: 0,
-          status: 'Invalid Date'
+          hoursLeft: 0,
+          minutesLeft: 0,
+          status: 'Invalid Format',
+          timeRemaining: 'Invalid date format'
         };
       }
       
-      const isExpired = expiryDate < now;
-      const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const [, month, day, year, hour, minute, second, ampm] = dateMatch;
+      
+      const months = {
+        'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
+        'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
+      };
+      
+      let hour24 = parseInt(hour);
+      if (ampm === 'PM' && hour24 !== 12) hour24 += 12;
+      if (ampm === 'AM' && hour24 === 12) hour24 = 0;
+      
+      const expiryDate = new Date(
+        parseInt(year),
+        months[month as keyof typeof months],
+        parseInt(day),
+        hour24,
+        parseInt(minute),
+        parseInt(second)
+      );
+      
+      const now = new Date(); // Use actual current time, not state
+      
+      console.log('Manually parsed expiry date:', expiryDate);
+      console.log('Current date and time:', now);
+      console.log('Expiry timestamp:', expiryDate.getTime());
+      console.log('Current timestamp:', now.getTime());
+      
+      const timeDiff = expiryDate.getTime() - now.getTime();
+      const isExpired = timeDiff <= 0;
+      
+      console.log('Time difference (ms):', timeDiff);
+      console.log('Time difference (days):', timeDiff / (1000 * 60 * 60 * 24));
+      console.log('Is expired:', isExpired);
+      
+      if (isExpired) {
+        const expiredTime = Math.abs(timeDiff);
+        const expiredDays = Math.floor(expiredTime / (1000 * 60 * 60 * 24));
+        return {
+          isExpired: true,
+          daysLeft: 0,
+          hoursLeft: 0,
+          minutesLeft: 0,
+          status: 'Expired',
+          timeRemaining: `Expired ${expiredDays} day${expiredDays !== 1 ? 's' : ''} ago`
+        };
+      }
+      
+      const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      console.log('Final calculation - Days:', daysLeft, 'Hours:', hoursLeft, 'Minutes:', minutesLeft);
+      
+      // Create formatted time remaining string
+      let timeRemaining = '';
+      if (daysLeft > 0) {
+        timeRemaining = `${daysLeft}d ${hoursLeft}h`;
+      } else if (hoursLeft > 0) {
+        timeRemaining = `${hoursLeft}h ${minutesLeft}m`;
+      } else {
+        timeRemaining = `${minutesLeft}m`;
+      }
       
       return {
-        isExpired,
-        daysLeft: Math.max(0, daysLeft), // Ensure non-negative days
-        status: isExpired ? 'Expired' : daysLeft <= 7 ? 'Expiring Soon' : 'Active'
+        isExpired: false,
+        daysLeft: Math.max(0, daysLeft),
+        hoursLeft: Math.max(0, hoursLeft),
+        minutesLeft: Math.max(0, minutesLeft),
+        status: daysLeft <= 7 ? 'Expiring Soon' : 'Active',
+        timeRemaining
       };
     } catch (error) {
-      console.error('Error parsing expiry date:', error);
+      console.error('Error in getSubscriptionStatus:', error);
       return {
         isExpired: true,
         daysLeft: 0,
-        status: 'Invalid Date'
+        hoursLeft: 0,
+        minutesLeft: 0,
+        status: 'Parse Error',
+        timeRemaining: 'Error calculating expiry'
       };
     }
   };
@@ -222,9 +308,12 @@ const UserView: React.FC = () => {
   const subscriptionStatus = user?.subscription?.expires_at ? getSubscriptionStatus(user.subscription.expires_at) : {
     isExpired: true,
     daysLeft: 0,
-    status: 'No Subscription'
+    hoursLeft: 0,
+    minutesLeft: 0,
+    status: 'No Subscription',
+    timeRemaining: 'No active subscription'
   };
-  const daysActive = user?.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const daysActive = user?.createdAt ? Math.floor((currentTime.getTime() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -323,14 +412,47 @@ const UserView: React.FC = () => {
                     <p className="text-2xl font-bold text-blue-700">{daysActive}</p>
                     <p className="text-xs text-blue-600 font-medium">Days Active</p>
                   </div>
-                  <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
-                    <div className="flex items-center justify-center mb-2">
-                      <Clock4 className="w-5 h-5 text-green-600" />
+                  <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-100/50 to-emerald-100/50"></div>
+                    <div className="relative">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className={`p-1 rounded-full ${subscriptionStatus.isExpired ? 'bg-red-100' : subscriptionStatus.daysLeft <= 7 ? 'bg-yellow-100' : 'bg-green-200'} animate-pulse`}>
+                          <Timer className={`w-4 h-4 ${subscriptionStatus.isExpired ? 'text-red-600' : subscriptionStatus.daysLeft <= 7 ? 'text-yellow-600' : 'text-green-600'}`} />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        {subscriptionStatus.isExpired ? (
+                          <>
+                            <p className="text-2xl font-bold text-red-700">
+                              EXPIRED
+                            </p>
+                            <p className="text-xs text-red-600 font-medium">Subscription Ended</p>
+                          </>
+                        ) : subscriptionStatus.daysLeft === 0 ? (
+                          <>
+                            <p className="text-2xl font-bold text-orange-700">
+                              TODAY
+                            </p>
+                            <p className="text-xs text-orange-600 font-medium">Expires Today</p>
+                            <div className="text-xs text-orange-500 font-mono bg-orange-100 px-2 py-1 rounded-full">
+                              {subscriptionStatus.hoursLeft}h {subscriptionStatus.minutesLeft}m left
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className={`text-2xl font-bold ${subscriptionStatus.daysLeft <= 7 ? 'text-yellow-700' : 'text-green-700'}`}>
+                              {subscriptionStatus.daysLeft}
+                            </p>
+                            <p className={`text-xs font-medium ${subscriptionStatus.daysLeft <= 7 ? 'text-yellow-600' : 'text-green-600'}`}>
+                              {subscriptionStatus.daysLeft === 1 ? 'Day Left' : 'Days Left'}
+                            </p>
+                            <div className={`text-xs font-mono px-2 py-1 rounded-full ${subscriptionStatus.daysLeft <= 7 ? 'text-yellow-500 bg-yellow-100' : 'text-green-500 bg-green-100'}`}>
+                              {subscriptionStatus.timeRemaining}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-2xl font-bold text-green-700">
-                      {subscriptionStatus.daysLeft || 0}
-                    </p>
-                    <p className="text-xs text-green-600 font-medium">Days Left</p>
                   </div>
                 </div>
 
@@ -596,21 +718,51 @@ const UserView: React.FC = () => {
                 </div>
 
                 {!subscriptionStatus.isExpired && (
-                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Clock className="w-5 h-5 text-blue-600" />
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 to-indigo-100/20"></div>
+                    <div className="relative">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Timer className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-blue-900">Live Countdown</p>
+                          <p className="text-sm text-blue-700 mt-1">Subscription expires in real-time</p>
+                        </div>
                       </div>
+                      
+                      <div className="grid grid-cols-3 gap-4 mt-4">
+                        <div className="text-center p-3 bg-blue-100/50 rounded-lg">
+                          <p className="text-xl font-bold text-blue-800">{subscriptionStatus.daysLeft}</p>
+                          <p className="text-xs text-blue-600 font-medium">Days</p>
+                        </div>
+                        <div className="text-center p-3 bg-indigo-100/50 rounded-lg">
+                          <p className="text-xl font-bold text-indigo-800">{subscriptionStatus.hoursLeft}</p>
+                          <p className="text-xs text-indigo-600 font-medium">Hours</p>
+                        </div>
+                        <div className="text-center p-3 bg-purple-100/50 rounded-lg">
+                          <p className="text-xl font-bold text-purple-800">{subscriptionStatus.minutesLeft}</p>
+                          <p className="text-xs text-purple-600 font-medium">Minutes</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 text-center">
+                        <span className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-full text-sm font-semibold">
+                          <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                          <span>{subscriptionStatus.timeRemaining} remaining</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {subscriptionStatus.isExpired && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-100">
+                    <div className="flex items-center space-x-3 text-red-700">
+                      <XCircle className="w-6 h-6" />
                       <div>
-                        <p className="font-semibold text-blue-900">
-                          {subscriptionStatus.daysLeft > 1 
-                            ? `${subscriptionStatus.daysLeft} days remaining`
-                            : subscriptionStatus.daysLeft === 1
-                            ? "1 day remaining"
-                            : "Expires today"
-                          }
-                        </p>
-                        <p className="text-sm text-blue-700 mt-1">Your subscription is active and in good standing</p>
+                        <p className="font-semibold">Subscription Expired</p>
+                        <p className="text-sm text-red-600 mt-1">{subscriptionStatus.timeRemaining}</p>
                       </div>
                     </div>
                   </div>
@@ -724,14 +876,24 @@ const UserView: React.FC = () => {
                   <p className="text-xs text-blue-600 font-medium">Total Days</p>
                 </div>
                 
-                <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100 hover:from-green-100 hover:to-emerald-100 transition-all duration-200">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100 hover:from-green-100 hover:to-emerald-100 transition-all duration-200 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-100/30 to-emerald-100/30"></div>
+                  <div className="relative">
+                    <div className="flex items-center justify-center mb-3">
+                      <div className={`p-2 rounded-lg ${subscriptionStatus.isExpired ? 'bg-red-100' : 'bg-green-100'}`}>
+                        <Timer className={`w-5 h-5 ${subscriptionStatus.isExpired ? 'text-red-600' : 'text-green-600'}`} />
+                      </div>
                     </div>
+                    <p className={`text-2xl font-bold ${subscriptionStatus.isExpired ? 'text-red-700' : 'text-green-700'}`}>
+                      100%
+                    </p>
+                    <p className="text-xs text-green-600 font-medium">Profile Complete</p>
+                    {!subscriptionStatus.isExpired && (
+                      <div className="mt-2 text-xs text-green-500 font-mono bg-green-100 px-2 py-1 rounded-full">
+                        Live: {subscriptionStatus.timeRemaining}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-2xl font-bold text-green-700">100%</p>
-                  <p className="text-xs text-green-600 font-medium">Profile Complete</p>
                 </div>
                 
                 <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100 hover:from-purple-100 hover:to-pink-100 transition-all duration-200">
