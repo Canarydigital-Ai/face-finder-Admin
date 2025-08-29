@@ -90,7 +90,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const subscriptionData = {
       name: formData.name.trim(),
       price: formData.price,
-      duration: formData.duration as 'monthly' | 'HalfYear' | 'yearly',
+      duration: formData.duration as 'monthly' | 'half-year' | 'yearly',
       ideal: formData.ideal.trim(),
       storage: formData.storage.trim() || undefined,
       features: formData.features.filter(f => f.trim()),
@@ -144,7 +144,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (price === 0) return "Free";
     const currency = "₹";
     const durationLabel = duration === "monthly" ? "/month" : 
-                         duration === "HalfYear" ? "/HalfYear" : "/year";
+                         duration === "half-year" ? "/half-year" : "/year";
     return `${currency}${price.toLocaleString()}${durationLabel}`;
   };
 
@@ -193,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 required
               >
                 <option value="monthly">Monthly</option>
-                <option value="HalfYear">HalfYear</option>
+                <option value="half-year">half-year</option>
                 <option value="yearly">Yearly</option>
               </select>
             </div>
