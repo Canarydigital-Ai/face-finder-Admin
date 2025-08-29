@@ -20,10 +20,8 @@ import {
   XCircle,
   Shield,
   Globe,
-  Edit3,
   MoreVertical,
   Activity,
-  Zap,
   Star,
   Settings,
   UserCheck,
@@ -338,7 +336,7 @@ const UserView: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">User Profile</h1>
-                  <p className="text-sm text-gray-500">Detailed user information</p>
+        
                 </div>
               </div>
             </div>
@@ -469,27 +467,8 @@ const UserView: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="mt-6 bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                <Zap className="w-5 h-5 text-yellow-500" />
-                <span>Quick Actions</span>
-              </h3>
-              <div className="space-y-3">
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-blue-50 rounded-lg transition-colors duration-200 group">
-                  <Edit3 className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="text-sm font-medium text-gray-700">Edit Profile</span>
-                </button>
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-purple-50 rounded-lg transition-colors duration-200 group">
-                  <Shield className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="text-sm font-medium text-gray-700">Security Settings</span>
-                </button>
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-green-50 rounded-lg transition-colors duration-200 group">
-                  <TrendingUp className="w-4 h-4 text-green-600 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="text-sm font-medium text-gray-700">View Analytics</span>
-                </button>
-              </div>
-            </div>
+        
+            
           </div>
 
           {/* Enhanced Details Section */}

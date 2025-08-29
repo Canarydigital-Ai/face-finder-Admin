@@ -201,7 +201,7 @@ const CreateSubscription: React.FC = () => {
 
   return (
     <div className="">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto ">
         <div className="flex items-end justify-between mb-6">
           <h2 className="text-2xl font-bold text-[#FFD426]">
             Create Subscription Plan
@@ -216,7 +216,7 @@ const CreateSubscription: React.FC = () => {
           className="bg-[#111111] p-4 rounded-lg shadow-md border border-gray-800"
         >
           {/* Basic Information - Mapped Input Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-y-4 gap-x-4 mb-6">
             {inputFields.map((field) => (
               <div key={field.id} className={field.colSpan}>
                 <label
