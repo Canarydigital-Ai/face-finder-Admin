@@ -28,11 +28,13 @@ export interface User {
   industryAreas: string[];
   createdAt?: any;
   updatedAt?: any;
+ 
   subscription: {
     planName: string;
     billing: string;
-    activatedAt: string;
-    expires_at: string;
+  activatedAt?: string | null;
+    expires_at?: string | null;
+   
   };
 }
 
