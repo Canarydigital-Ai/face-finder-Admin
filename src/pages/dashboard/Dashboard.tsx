@@ -1,36 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  BarChart, 
-  Bar, 
-  ResponsiveContainer 
-} from 'recharts';
-import { 
-  FaUsers, 
-  FaCalendarAlt, 
-  FaRupeeSign, 
-  FaCrown, 
-  FaArrowUp, 
-  FaArrowDown, 
-  FaUserFriends,
-  FaChartLine,
-  FaCreditCard
-} from 'react-icons/fa';
+import{AreaChart,Area,XAxis,YAxis,CartesianGrid,Tooltip,PieChart,Pie,Cell,BarChart,Bar,ResponsiveContainer}from 'recharts'
+import{FaUsers,FaCalendarAlt,FaRupeeSign,FaCrown,FaArrowUp,FaArrowDown,FaChartLine,FaUserFriends,FaCreditCard,}from 'react-icons/fa'
 import { toast } from 'react-toastify';
-import { 
-  getDashboardStats, 
-  type DashboardStats, 
-  type Event, 
-  type Payment 
-} from '../../api/services/dashboardService';
+import{getDashboardStats,type DashboardStats,type Event,type Payment}from '../../api/services/dashboardService'
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -234,7 +206,7 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* Secondary Stats */}
+        {/* Secondary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Guest Users"
@@ -256,124 +228,228 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Monthly Revenue Chart */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-[#FFD426] mb-4">Monthly Revenue</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={monthlyRevenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis 
-                dataKey="formattedMonth" 
-                stroke="#666" 
-                fontSize={12}
-              />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                  borderRadius: '8px',
-                  color: '#FFD426'
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#FFD426" 
-                fill="#FFD426"
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+{/* Charts Section */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  {/* Monthly Revenue Chart */}
+  <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 hover:border-[#FFD426]/50 transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-xl font-semibold text-[#FFD426]">Monthly Revenue Trend</h3>
+      <FaChartLine className="text-[#FFD426]" size={20} />
+    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <AreaChart data={monthlyRevenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#FFD426" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="#FFD426" stopOpacity={0.1}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+        <XAxis 
+          dataKey="formattedMonth" 
+          stroke="#888" 
+          fontSize={12}
+          tick={{ fill: '#888' }}
+        />
+        <YAxis 
+          stroke="#888" 
+          fontSize={12}
+          tick={{ fill: '#888' }}
+          tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
+        />
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: '#0a0a0a',
+            border: '1px solid #FFD426',
+            borderRadius: '8px',
+            color: '#fff',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}
+          formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
+          labelStyle={{ color: '#FFD426' }}
+        />
+        <Area 
+          type="monotone" 
+          dataKey="revenue" 
+          stroke="#FFD426" 
+          strokeWidth={3}
+          fill="url(#revenueGradient)"
+          dot={{ fill: '#FFD426', strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, stroke: '#FFD426', strokeWidth: 2, fill: '#0a0a0a' }}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+    <div className="mt-3 flex items-center justify-between text-sm">
+      <span className="text-gray-400">
+        Total: ₹{stats.totalRevenue.toLocaleString()}
+      </span>
+      <span className="text-[#FFD426]">
+        {monthlyRevenueData.length} months data
+      </span>
+    </div>
+  </div>
 
-        {/* Daily Activity */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-[#FFD426] mb-4">Last 7 Days Activity</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dailyStatsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="date" stroke="#666" fontSize={12} />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                  borderRadius: '8px',
-                  color: '#FFD426'
-                }}
-              />
-              <Bar dataKey="revenue" fill="#FFD426" />
-              <Bar dataKey="events" fill="#4ECDC4" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+  {/* Daily Activity Multi-metric Chart */}
+  <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 hover:border-[#FFD426]/50 transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-xl font-semibold text-[#FFD426]">Weekly Activity Overview</h3>
+      <FaUsers className="text-[#FFD426]" size={20} />
+    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={dailyStatsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+        <XAxis 
+          dataKey="date" 
+          stroke="#888" 
+          fontSize={12}
+          tick={{ fill: '#888' }}
+        />
+        <YAxis 
+          stroke="#888" 
+          fontSize={12}
+          tick={{ fill: '#888' }}
+        />
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: '#0a0a0a',
+            border: '1px solid #FFD426',
+            borderRadius: '8px',
+            color: '#fff',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}
+          formatter={(value: number, name: string) => {
+            if (name === 'revenue') return [`₹${value.toLocaleString()}`, 'Revenue'];
+            return [value, name.charAt(0).toUpperCase() + name.slice(1)];
+          }}
+          labelStyle={{ color: '#FFD426' }}
+        />
+        <Bar 
+          dataKey="revenue" 
+          fill="#FFD426" 
+          name="revenue"
+          radius={[4, 4, 0, 0]}
+        />
+        <Bar 
+          dataKey="events" 
+          fill="#4ECDC4" 
+          name="events"
+          radius={[4, 4, 0, 0]}
+        />
+        <Bar 
+          dataKey="users" 
+          fill="#FF6B6B" 
+          name="users"
+          radius={[4, 4, 0, 0]}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+    <div className="mt-3 flex items-center justify-center space-x-6 text-xs">
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-[#FFD426] rounded-full"></div>
+        <span className="text-gray-400">Revenue</span>
       </div>
-
-      {/* Pie Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Event Types Distribution */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-[#FFD426] mb-4">Event Types</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={eventTypeData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-               label={({ name, percent } ) => percent !== undefined ? `${name} ${(percent * 100).toFixed(0)}%` : `${name}`}
-              >
-                {eventTypeData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                  borderRadius: '8px',
-                  color: '#FFD426'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Subscription Distribution */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-[#FFD426] mb-4">Subscription Plans</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={subscriptionData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent } ) => percent !== undefined ? `${name} ${(percent * 100).toFixed(0)}%` : `${name}`}
-              >
-                {subscriptionData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                  borderRadius: '8px',
-                  color: '#FFD426'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-[#4ECDC4] rounded-full"></div>
+        <span className="text-gray-400">Events</span>
       </div>
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-[#FF6B6B] rounded-full"></div>
+        <span className="text-gray-400">Users</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Enhanced Pie Charts */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  {/* Event Types Distribution */}
+  <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 hover:border-[#FFD426]/50 transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-xl font-semibold text-[#FFD426]">Event Categories</h3>
+      <FaCalendarAlt className="text-[#FFD426]" size={20} />
+    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={eventTypeData}
+          cx="50%"
+          cy="50%"
+          labelLine={false}
+          label={({ name, percent }) => 
+            percent !== undefined && percent > 0.05 ? `${name} (${(percent * 100).toFixed(1)}%)` : ''
+          }
+          outerRadius={100}
+          fill="#8884d8"
+          dataKey="value"
+          stroke="#0a0a0a"
+          strokeWidth={2}
+        >
+          {eventTypeData.map((_, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: '#0a0a0a',
+            border: '1px solid #FFD426',
+            borderRadius: '8px',
+            color: '#fff'
+          }}
+          formatter={(value: number, name: string) => [value, name]}
+        />
+      </PieChart>
+    </ResponsiveContainer>
+    <div className="mt-3 text-center">
+      <span className="text-sm text-gray-400">
+        {stats.totalEvents} total events across {eventTypeData.length} categories
+      </span>
+    </div>
+  </div>
+
+  {/* Subscription Distribution */}
+  <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 hover:border-[#FFD426]/50 transition-all duration-300">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-xl font-semibold text-[#FFD426]">Subscription Plans</h3>
+      <FaCrown className="text-[#FFD426]" size={20} />
+    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={subscriptionData}
+          cx="50%"
+          cy="50%"
+          labelLine={false}
+          label={({ name, percent }) => 
+            percent !== undefined && percent > 0.05 ? `${name} (${(percent * 100).toFixed(1)}%)` : ''
+          }
+          outerRadius={100}
+          fill="#8884d8"
+          dataKey="value"
+          stroke="#0a0a0a"
+          strokeWidth={2}
+        >
+          {subscriptionData.map((_, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: '#0a0a0a',
+            border: '1px solid #FFD426',
+            borderRadius: '8px',
+            color: '#fff'
+          }}
+          formatter={(value: number, name: string) => [value, `${name} Users`]}
+        />
+      </PieChart>
+    </ResponsiveContainer>
+    <div className="mt-3 text-center">
+      <span className="text-sm text-gray-400">
+        {stats.activeSubscriptions} active, {stats.expiredSubscriptions} expired
+      </span>
+    </div>
+  </div>
+</div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

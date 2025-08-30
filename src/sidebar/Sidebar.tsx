@@ -181,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-[45px] h-[45px] rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-[45px] h-[45px] rounded-full bg-gradient-to-br from-[#FFD426] to-gray-800 flex items-center justify-center">
                 <FaTachometerAlt className="text-white text-xl" />
               </div>
               <div>
